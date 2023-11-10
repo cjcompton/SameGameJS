@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.configDotenv()
 
 const { DISCORD_TOKEN, DISCORD_CLIENT_ID } = process.env;
 
