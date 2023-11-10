@@ -13,6 +13,8 @@ client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
+registerCommands({guildId: config.GUILD_ID })
+
 client.on("guildCreate", async (guild) => {
   await registerCommands({ guildId: guild.id });
 });
@@ -29,3 +31,4 @@ client.on("interactionCreate", async (interaction) => {
 
 // Log in to Discord with your client's token
 client.login(config.DISCORD_TOKEN);
+// console.log(client.users.fetch)
