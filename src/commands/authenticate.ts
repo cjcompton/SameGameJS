@@ -19,7 +19,7 @@ export async function execute(interaction: CommandInteraction) {
   // auth server validates state
   // access code is exchanged with discord for access token
   // access token & refresh token are stored in db for later use
-  // auth server checks if id in localStorage exists & exists in db
+  // auth server checks if id in localStorage exists & exists in db & matches access token
   // if yes, auth server creates button with deeplink to server+channel via:
   // discord://discordapp.com/channels/SERVERID/CHANNELID
   // if no, auth server just displays a "done! close this window." page
