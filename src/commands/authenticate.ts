@@ -1,3 +1,4 @@
+import axios from "axios";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
@@ -24,5 +25,12 @@ export async function execute(interaction: CommandInteraction) {
   // discord://discordapp.com/channels/SERVERID/CHANNELID
   // if no, auth server just displays a "done! close this window." page
   // user is now authenticated
-  return interaction.reply("link/to/auth/server");
+  const userid = interaction.user.id
+  const channelId = interaction.channelId
+  const guildId = interaction.guildId
+  console.log('creating auth link for' + interaction.user.id)
+  const link = await axios.get(`http://localhost:3000/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
+  console.log(link)
+  return interaction.reply(link.data);
+  // return interaction.reply("link/to/auth/server");
 }
