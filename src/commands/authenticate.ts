@@ -29,6 +29,10 @@ export async function execute(interaction: CommandInteraction) {
   const channelId = interaction.channelId
   const guildId = interaction.guildId
   console.log('creating auth link for' + interaction.user.id)
+  const isUserAlreadyAuth = await axios.get(`http://localhost:3000/checkauth?userId=${userid}`)
+  if (isUserAlreadyAuth.data) {
+    return interaction.reply("You're aleady authenticated!")
+  }
   const link = await axios.get(`http://localhost:3000/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
   console.log(link)
   return interaction.reply({ content: link.data, ephemeral: true });
