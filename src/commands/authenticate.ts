@@ -6,7 +6,7 @@ export const data = new SlashCommandBuilder()
   .setDescription("Allow SameGame to read connected accounts")
 
 
-  
+
 export async function execute(interaction: CommandInteraction) {
   // user types /auth
   // get user's id, guild id, and current channel id
@@ -31,6 +31,6 @@ export async function execute(interaction: CommandInteraction) {
   console.log('creating auth link for' + interaction.user.id)
   const link = await axios.get(`http://localhost:3000/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
   console.log(link)
-  return interaction.reply(link.data);
+  return interaction.reply({ content: link.data, ephemeral: true });
   // return interaction.reply("link/to/auth/server");
 }
