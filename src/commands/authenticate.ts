@@ -23,6 +23,7 @@ export async function execute(interaction: CommandInteraction) {
   // auth server checks if id in localStorage exists & exists in db & matches access token
   // if yes, auth server creates button with deeplink to server+channel via:
   // discord://discordapp.com/channels/SERVERID/CHANNELID
+  // discord://discord.com/channels/1171574485116264488/1172318329306873926 (dev channel)
   // if no, auth server just displays a "done! close this window." page
   // user is now authenticated
   const userid = interaction.user.id
@@ -31,7 +32,7 @@ export async function execute(interaction: CommandInteraction) {
   console.log('creating auth link for' + interaction.user.id)
   const isUserAlreadyAuth = await axios.get(`http://localhost:3000/checkauth?userId=${userid}`)
   if (isUserAlreadyAuth.data) {
-    return interaction.reply("You're aleady authenticated!")
+    return interaction.reply({ content: "You're already authenticated!", ephemeral: true })
   }
   const link = await axios.get(`http://localhost:3000/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
   console.log(link)
