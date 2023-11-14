@@ -1,5 +1,6 @@
 import axios from "axios";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { config } from "src/config";
 
 export const data = new SlashCommandBuilder()
   .setName("deauth")
@@ -10,7 +11,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
   const userid = interaction.user.id
   console.log('deauthorizing' + interaction.user.id)
-  const link = await axios.get(`http://localhost:3000/deauth?userId=${userid}`)
+  const link = await axios.get(`${config.SERVER_IP}/deauth?userId=${userid}`)
   console.log(link)
   return interaction.reply({ content: link.data, ephemeral: true });
   // return interaction.reply("link/to/auth/server");
