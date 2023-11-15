@@ -1,6 +1,6 @@
 import axios from "axios";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { config } from "src/config";
+import { config } from "../config";
 
 export const data = new SlashCommandBuilder()
   .setName("auth")

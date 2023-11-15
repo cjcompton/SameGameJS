@@ -1,5 +1,6 @@
 import { ActionRowBuilder, CommandInteraction, ComponentType, MessageComponentType, ModalActionRowComponentBuilder, SlashCommandBuilder, UserSelectMenuBuilder, UserSelectMenuInteraction } from "discord.js";
 import { checkAuth } from "../requests/checkAuth";
+import { getSharedGames } from "../requests/getSharedGames";
 
 export const data = new SlashCommandBuilder()
   .setName("samegame")
@@ -31,15 +32,21 @@ export async function execute(interaction: CommandInteraction) {
     // check auth
     try {
       const authResponse = await checkAuth(userIds)
-      const unauthNames = authResponse.unauthenticatedUsers.map(user => '<@' + confirmation.users.get(user)?.id + '>')
-      const authNames = authResponse.authenticatedUsers.map(user => '<@' + confirmation.users.get(user)?.id + '>')
-      const unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.toString()}\nType "/auth" to authenticate.`
-      if (authResponse.authenticatedUsers.length < 2) {
+      const unauthNames = authResponse.unauthenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
+      const authNames = authResponse.authenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
+      const unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
+      if (authResponse.authenticatedUserIds.length < 2) {
         await confirmation.update({ content: "Not enough authenticated users." + '\n' + unauthReply, components: [] })
       } else {
-        // check steam games
+        const sharedGames: GameObj[] = await getSharedGames(authResponse.authenticatedUserIds)
+        const readableSharedGames = '* ' + sharedGames.map(obj => obj.name).join('\n* ')
 
-        // const reply = `Multiplayer games ${authNames.toString()} all have:\n`
+        const authReply = `Multiplayer games ${authNames.join(', ')} share:`
+        if (unauthNames.length > 0) {
+          await confirmation.update({ content: authReply + '\n' + readableSharedGames + '\n' + unauthReply, components: [] })
+        } else {
+          await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
+        }
 
       }
 
@@ -53,4 +60,11 @@ export async function execute(interaction: CommandInteraction) {
     console.error(e)
     await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
   }
+}
+
+interface GameObj {
+  appid: number
+  name: string
+  ct: number
+  multiplayer?: boolean
 }
