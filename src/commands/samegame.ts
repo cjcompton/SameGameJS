@@ -29,34 +29,40 @@ export async function execute(interaction: CommandInteraction) {
     const confirmation: UserSelectMenuInteraction = await response.awaitMessageComponent<ComponentType.UserSelect>({ filter: collectorFilter, time: 60000 });
     const userIds = Array.from(confirmation.users.keys())
 
-    // check auth
     try {
+      // if checkAuth fails you have big problems to worry about
       const authResponse = await checkAuth(userIds)
       const unauthNames = authResponse.unauthenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
       const authNames = authResponse.authenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
       const unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
+      const authReply = `Multiplayer games ${authNames.join(', ')} share:`
+
       if (authResponse.authenticatedUserIds.length < 2) {
         await confirmation.update({ content: "Not enough authenticated users." + '\n' + unauthReply, components: [] })
-      } else {
+        return
+      }
+
+      try {
+        // compare games
         const sharedGames: GameObj[] = await getSharedGames(authResponse.authenticatedUserIds)
         const readableSharedGames = '* ' + sharedGames.map(obj => obj.name).join('\n* ')
 
-        const authReply = `Multiplayer games ${authNames.join(', ')} share:`
         if (unauthNames.length > 0) {
           await confirmation.update({ content: authReply + '\n' + readableSharedGames + '\n' + unauthReply, components: [] })
         } else {
           await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
         }
 
+      } catch (e) { // getSharedGames catch
+        console.error(e)
+        await confirmation.update({ content: 'Internal server error. Please try again later.', components: [] })
       }
-
-      // const reply = 'Authenticated users: ' + JSON.stringify(authResponse.authenticatedUsers) + '\n' + 'Unauthenticated users: ' + JSON.stringify(authResponse.unauthenticatedUsers)
-      // await confirmation.update({ content: reply, components: [] })
-    } catch (e) {
+    } catch (e) { // checkAuth catch
+      console.error('database down', e)
       await confirmation.update({ content: 'Internal server error. Please try again later.', components: [] })
     }
 
-  } catch (e) {
+  } catch (e) { // awaitMessageComponent catch
     console.error(e)
     await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
   }

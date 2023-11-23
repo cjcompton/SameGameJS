@@ -12,15 +12,11 @@ export async function checkAuth(userIds: string[]) {
   }
   await Promise.all(
     userIds.map(async (userId) => {
-      try {
-        const isUserAlreadyAuth = await axios.get(`${config.SERVER_IP}/checkauth?userId=${userId}`)
-        if (isUserAlreadyAuth.data) {
-          response.authenticatedUserIds.push(userId)
-        } else {
-          response.unauthenticatedUserIds.push(userId)
-        }
-      } catch (e) {
-        throw e
+      const isUserAlreadyAuth = await axios.get(`${config.SERVER_IP}/checkauth?userId=${userId}`)
+      if (isUserAlreadyAuth.data) {
+        response.authenticatedUserIds.push(userId)
+      } else {
+        response.unauthenticatedUserIds.push(userId)
       }
     })
   )
