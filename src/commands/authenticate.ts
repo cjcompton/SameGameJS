@@ -36,7 +36,9 @@ export async function execute(interaction: CommandInteraction) {
     userIds: [userid]
   })
   console.log(isUserAlreadyAuth)
-  if (isUserAlreadyAuth.data.authenticatedUserIds.length > 0) {
+  if (isUserAlreadyAuth.data?.unlinkedSteamUserIds.length > 0) {
+    return interaction.reply({ content: "You still need to link your Steam account to Discord ([Guide](https://support.discord.com/hc/en-us/articles/8063233404823-Connections-Linked-Roles-Community-Members#h_01GK285ENTCX37J9PYCM1ADXCH)).", ephemeral: true })
+  } else if (isUserAlreadyAuth.data?.authenticatedUserIds.length > 0) {
     return interaction.reply({ content: "You're already authenticated!", ephemeral: true })
   }
   const link = await axios.get(`${process.env.SERVER_IP}/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
