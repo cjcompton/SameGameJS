@@ -32,26 +32,33 @@ export async function execute(interaction: CommandInteraction) {
     try {
       // if checkAuth fails you have big problems to worry about
       const authResponse = await checkAuth(userIds)
-      const unauthNames = authResponse.unauthenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
-      const authNames = authResponse.authenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
+      if (!authResponse) {
+        await confirmation.update({ content: 'Internal server error: DB1. Please report this error and try again later.', components: [] })
+        return
+      }
+      const unauthNames = authResponse.unauthenticatedUserIds.map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
+      const unlinkedNames = authResponse.unlinkedSteamUserIds.map(userId => '<@' + userId + '>')
+      const authNames = authResponse.authenticatedUserIds
+        .map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
+        .filter(name => !(unlinkedNames.includes(name)))
+
       let unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
       let authReply = `Multiplayer games ${authNames.join(', ')} share:`
 
-      if (authResponse.authenticatedUserIds.length < 2) {
+      if (authNames.length < 2) {
         await confirmation.update({ content: "Not enough authenticated users." + '\n' + unauthReply, components: [] })
         return
+      }
+
+      if (unlinkedNames.length > 0) {
+        const reply = `\nUsers that still need to link Steam to Discord: ${unlinkedNames.join(', ')}`
+        unauthReply += reply
       }
 
       try {
         // compare games
         const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
         const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
-        const unlinkedNames = sharedGames.unlinkedIds.map(id => '<@' + id + '>')
-
-        if (unlinkedNames.length > 0) {
-          const reply = `\nUsers that still need to link Steam to Discord: ${unlinkedNames.join(', ')}`
-          unauthReply += reply
-        }
 
         if (unauthNames.length > 0) {
           await confirmation.update({ content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [] })
@@ -61,11 +68,11 @@ export async function execute(interaction: CommandInteraction) {
 
       } catch (e) { // getSharedGames catch
         console.error(e)
-        await confirmation.update({ content: 'Internal server error. Please try again later.', components: [] })
+        await confirmation.update({ content: 'Internal server error: SG. Please report this error and try again later.', components: [] })
       }
     } catch (e) { // checkAuth catch
       console.error('database down', e)
-      await confirmation.update({ content: 'Internal server error. Please try again later.', components: [] })
+      await confirmation.update({ content: 'Internal server error: DB2. Please try again later.', components: [] })
     }
 
   } catch (e) { // awaitMessageComponent catch
