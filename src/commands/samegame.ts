@@ -42,17 +42,20 @@ export async function execute(interaction: CommandInteraction) {
         .map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
         .filter(name => !(unlinkedNames.includes(name)))
 
-      let unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
       let authReply = `Multiplayer games ${authNames.join(', ')} share:`
-
-      if (authNames.length < 2) {
-        await confirmation.update({ content: "Not enough authenticated users." + '\n' + unauthReply, components: [] })
-        return
+      let unauthReply = ''
+      if (unauthNames.length > 0) {
+        unauthReply = `\nUnable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
       }
 
       if (unlinkedNames.length > 0) {
         const reply = `\nUsers that still need to link Steam to Discord: ${unlinkedNames.join(', ')}`
         unauthReply += reply
+      }
+
+      if (authNames.length < 2) {
+        await confirmation.update({ content: "Not enough authenticated users." + unauthReply, components: [] })
+        return
       }
 
       try {
