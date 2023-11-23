@@ -1,6 +1,7 @@
 import axios from "axios";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { config } from "../config";
+import { AuthResponse } from "src/requests/checkAuth";
 
 export const data = new SlashCommandBuilder()
   .setName("auth")
@@ -31,8 +32,11 @@ export async function execute(interaction: CommandInteraction) {
   const channelId = interaction.channelId
   const guildId = interaction.guildId
   console.log('creating auth link for' + interaction.user.id)
-  const isUserAlreadyAuth = await axios.get(`${config.SERVER_IP}/checkauth?userId=${userid}`)
-  if (isUserAlreadyAuth.data) {
+  const isUserAlreadyAuth = await axios.post<AuthResponse>(`${config.SERVER_IP}/checkauth`, {
+    userIds: [userid]
+  })
+  console.log(isUserAlreadyAuth)
+  if (isUserAlreadyAuth.data.authenticatedUserIds.length > 0) {
     return interaction.reply({ content: "You're already authenticated!", ephemeral: true })
   }
   const link = await axios.get(`${process.env.SERVER_IP}/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
