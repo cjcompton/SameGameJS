@@ -34,8 +34,8 @@ export async function execute(interaction: CommandInteraction) {
       const authResponse = await checkAuth(userIds)
       const unauthNames = authResponse.unauthenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
       const authNames = authResponse.authenticatedUserIds.map(user => '<@' + confirmation.users.get(user)?.id + '>')
-      const unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
-      const authReply = `Multiplayer games ${authNames.join(', ')} share:`
+      let unauthReply = `Unable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
+      let authReply = `Multiplayer games ${authNames.join(', ')} share:`
 
       if (authResponse.authenticatedUserIds.length < 2) {
         await confirmation.update({ content: "Not enough authenticated users." + '\n' + unauthReply, components: [] })
@@ -44,11 +44,17 @@ export async function execute(interaction: CommandInteraction) {
 
       try {
         // compare games
-        const sharedGames: GameObj[] = await getSharedGames(authResponse.authenticatedUserIds)
-        const readableSharedGames = '* ' + sharedGames.map(obj => obj.name).join('\n* ')
+        const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
+        const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
+        const unlinkedNames = sharedGames.unlinkedIds.map(id => '<@' + id + '>')
+
+        if (unlinkedNames.length > 0) {
+          const reply = `\nUsers that still need to link Steam to Discord: ${unlinkedNames.join(', ')}`
+          unauthReply += reply
+        }
 
         if (unauthNames.length > 0) {
-          await confirmation.update({ content: authReply + '\n' + readableSharedGames + '\n' + unauthReply, components: [] })
+          await confirmation.update({ content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [] })
         } else {
           await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
         }
@@ -73,4 +79,10 @@ interface GameObj {
   name: string
   ct: number
   multiplayer?: boolean
+}
+type UnlinkedIds = string[]
+
+interface SharedGamesResponse {
+  games: GameObj[]
+  unlinkedIds: UnlinkedIds
 }
