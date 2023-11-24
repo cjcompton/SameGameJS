@@ -31,18 +31,27 @@ export async function execute(interaction: CommandInteraction) {
   const userid = interaction.user.id
   const channelId = interaction.channelId
   const guildId = interaction.guildId
-  console.log('creating auth link for' + interaction.user.id)
   const isUserAlreadyAuth = await axios.post<AuthResponse>(`${config.SERVER_IP}/checkauth`, {
     userIds: [userid]
   })
-  console.log(isUserAlreadyAuth)
+
+  // if user exists but is unauthenticated
+  if (isUserAlreadyAuth.data?.unauthenticatedUserIds.length > 0) {
+    const link = await axios.get(`${process.env.SERVER_IP}/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
+    return interaction.reply({ content: link.data, ephemeral: true });
+  }
+
+  // if user exists and is authenticated but steam is unlinked
   if (isUserAlreadyAuth.data?.unlinkedSteamUserIds.length > 0) {
     return interaction.reply({ content: "You still need to link your Steam account to Discord ([Guide](https://support.discord.com/hc/en-us/articles/8063233404823-Connections-Linked-Roles-Community-Members#h_01GK285ENTCX37J9PYCM1ADXCH)).", ephemeral: true })
-  } else if (isUserAlreadyAuth.data?.authenticatedUserIds.length > 0) {
+  }
+
+  // if user is already auth'd and linked
+  if (isUserAlreadyAuth.data?.authenticatedUserIds.length > 0) {
     return interaction.reply({ content: "You're already authenticated!", ephemeral: true })
   }
+
+  // if user doesn't exist yet
   const link = await axios.get(`${process.env.SERVER_IP}/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`)
-  console.log(link)
   return interaction.reply({ content: link.data, ephemeral: true });
-  // return interaction.reply("link/to/auth/server");
 }
