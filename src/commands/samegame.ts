@@ -37,20 +37,13 @@ export async function execute(interaction: CommandInteraction) {
         return
       }
       const unauthNames = authResponse.unauthenticatedUserIds.map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
-      const unlinkedNames = authResponse.unlinkedSteamUserIds.map(userId => '<@' + userId + '>')
       const authNames = authResponse.authenticatedUserIds
         .map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
-        .filter(name => !(unlinkedNames.includes(name)))
 
       let authReply = `Multiplayer games ${authNames.join(', ')} share:`
       let unauthReply = ''
       if (unauthNames.length > 0) {
         unauthReply = `\nUnable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
-      }
-
-      if (unlinkedNames.length > 0) {
-        const reply = `\nUsers that still need to link Steam to Discord: ${unlinkedNames.join(', ')}`
-        unauthReply += reply
       }
 
       if (authNames.length < 2) {
