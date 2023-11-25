@@ -54,9 +54,15 @@ export async function execute(interaction: CommandInteraction) {
       try {
         // compare games
         const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
+        if (sharedGames.unlinkedIds.length > 1) {
+          const unlinkedSteamDiscordNames = sharedGames.unlinkedIds.map(userId => '<@' + userId + '>')
+          unauthReply += `\nUnable to search users ${unlinkedSteamDiscordNames.join(', ')} because their Steam games are private.\nSet steam games to public: Open Steam, go to your profile, edit your profile, and change your "Game details" to public.`
+        }
         const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
 
-        if (unauthNames.length > 0) {
+        if (sharedGames.games.length < 1) {
+          await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
+        } else if (unauthNames.length > 0) {
           await confirmation.update({ content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [] })
         } else {
           await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
@@ -88,4 +94,5 @@ type UnlinkedIds = string[]
 interface SharedGamesResponse {
   games: GameObj[]
   unlinkedIds: UnlinkedIds
+  privateSteamIds: UnlinkedIds
 }
