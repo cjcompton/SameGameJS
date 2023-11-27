@@ -43,7 +43,9 @@ export async function execute(interaction: CommandInteraction) {
 
   // if user exists but steam is unlinked
   if (isUserAlreadyAuth.data?.unlinkedSteamUserIds.length > 0) {
-    return interaction.reply({ content: "You still need to link your Steam account to Discord ([Guide](https://sharedsteamgames.com/?guide=true)).", ephemeral: true })
+    let reply = "You still need to link your Steam account to Discord ([Guide](https://sharedsteamgames.com/?guide=true))."
+    reply += `\n Then use this link: ${process.env.SERVER_IP}/bot?userId=${userid}&guildId=${guildId}&channelId=${channelId}`
+    return interaction.reply({ content: reply, ephemeral: true })
   }
 
   // if user is already auth'd and linked
