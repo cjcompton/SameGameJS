@@ -37,13 +37,17 @@ export async function execute(interaction: CommandInteraction) {
         return
       }
       const unauthNames = authResponse.unauthenticatedUserIds.map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
-      const authNames = authResponse.authenticatedUserIds
-        .map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
+      const authNames = authResponse.authenticatedUserIds.map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
+      const unlinkedSteamNames = authResponse.unlinkedSteamUserIds.map(userId => '<@' + confirmation.users.get(userId)?.id + '>')
 
       let authReply = `Multiplayer games ${authNames.join(', ')} share:`
       let unauthReply = ''
       if (unauthNames.length > 0) {
-        unauthReply = `\nUnable to search unauthenticated account(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
+        unauthReply = `\nUnable to search user(s): ${unauthNames.join(', ')}\nType "/auth" to authenticate.`
+      }
+
+      if (unlinkedSteamNames.length > 0) {
+        unauthReply += `\nUnable to search user(s): ${unlinkedSteamNames.join(', ')} because their Steam and Discord accounts are unlinked ([Guide](https://sharedsteamgames.com?guide=true)).`
       }
 
       if (authNames.length < 2) {
@@ -54,11 +58,12 @@ export async function execute(interaction: CommandInteraction) {
       try {
         // compare games
         const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
-        if (sharedGames.unlinkedIds.length > 1) {
-          const unlinkedSteamDiscordNames = sharedGames.unlinkedIds.map(userId => '<@' + userId + '>')
-          unauthReply += `\nUnable to search users ${unlinkedSteamDiscordNames.join(', ')} because their Steam games are private.\nSet steam games to public: Open Steam, go to your profile, edit your profile, and change your "Game details" to public.`
-        }
         const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
+
+        if (sharedGames.privateSteamGamesDiscordIds.length > 0) {
+          const unlinkedSteamDiscordNames = sharedGames.privateSteamGamesDiscordIds.map(userId => '<@' + userId + '>')
+          unauthReply += `\nUnable to search users ${unlinkedSteamDiscordNames.join(', ')} because their Steam games are private ([Guide](https://sharedsteamgames.com?guide=true)).`
+        }
 
         if (sharedGames.games.length < 1) {
           await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
@@ -93,6 +98,7 @@ type UnlinkedIds = string[]
 
 interface SharedGamesResponse {
   games: GameObj[]
-  unlinkedIds: UnlinkedIds
-  privateSteamIds: UnlinkedIds
+  attemptedLinkedDiscordIds: UnlinkedIds
+  privateSteamGamesDiscordIds: UnlinkedIds
+  unauthenticatedDiscordIds: UnlinkedIds
 }

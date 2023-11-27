@@ -41,9 +41,9 @@ export async function execute(interaction: CommandInteraction) {
     return interaction.reply({ content: link.data, ephemeral: true });
   }
 
-  // if user exists and is authenticated but steam is unlinked
+  // if user exists but steam is unlinked
   if (isUserAlreadyAuth.data?.unlinkedSteamUserIds.length > 0) {
-    return interaction.reply({ content: "You still need to link your Steam account to Discord ([Guide](https://support.discord.com/hc/en-us/articles/8063233404823-Connections-Linked-Roles-Community-Members#h_01GK285ENTCX37J9PYCM1ADXCH)).", ephemeral: true })
+    return interaction.reply({ content: "You still need to link your Steam account to Discord ([Guide](https://sharedsteamgames.com/?guide=true)).", ephemeral: true })
   }
 
   // if user is already auth'd and linked
