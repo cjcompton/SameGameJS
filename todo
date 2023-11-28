@@ -1,0 +1,28 @@
+todo
+
+/suggest - pick a random game
+random game
+
+or
+
+rate games by playtime
+compare this rating to average global playtime. 
+use this ratio to determine desireability score for that player
+there has to be a voting algorithm out there that can aggregate these scores to get a desireability list of games
+
+
+or
+
+game tag
+
+---
+
+edit samegame reply to keep user select open
+
+"let other people use this menu [ ]"
+
+---
+
+bot config:
+  max bot instances per server
+  default sharing: private/public
