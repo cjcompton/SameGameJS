@@ -4,6 +4,7 @@ import * as auth from './authenticate'
 import * as deauth from './deauthenticate'
 import * as samegame from './samegame'
 import * as help from './help'
+import * as suggest from './suggest'
 
 export const commands = {
   // ping,
@@ -11,5 +12,6 @@ export const commands = {
   help,
   auth,
   deauth,
-  samegame
+  samegame,
+  suggest,
 };
