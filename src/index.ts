@@ -11,6 +11,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, 'GuildMembers'] 
 // We use 'c' for the event parameter to keep it separate from the already defined 'client'
 client.once(Events.ClientReady, c => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
+  console.log(JSON.parse(config.DEV_MODE))
 });
 
 registerCommands({ guildId: config.GUILD_ID })
@@ -24,7 +25,7 @@ client.on("interactionCreate", async (interaction) => {
     return;
   }
   // DEV
-  if (config.DEV_MODE) {
+  if (JSON.parse(config.DEV_MODE)) {
     if (interaction.user.id != '175852481488617472') {
       await interaction.reply({ content: "This bot is currently in dev mode. Only Noah can execute commands.", ephemeral: true })
       return
