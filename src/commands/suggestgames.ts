@@ -1,4 +1,4 @@
-import { ActionRowBuilder, CommandInteraction, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuComponent, StringSelectMenuOptionBuilder, UserSelectMenuBuilder } from "discord.js";
+import { ActionRowBuilder, CommandInteraction, ComponentType, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuComponent, StringSelectMenuInteraction, StringSelectMenuOptionBuilder, UserSelectMenuBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
   .setName("suggestgames")
@@ -32,18 +32,23 @@ export async function execute(interaction: CommandInteraction) {
     .setMinValues(2)
     .setMaxValues(5);
 
-  const row = new ActionRowBuilder<StringSelectMenuBuilder | UserSelectMenuBuilder>()
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>()
     .addComponents(select)
   const row2 = new ActionRowBuilder<UserSelectMenuBuilder>()
     .addComponents(userSelect)
 
-  const response = await interaction.reply({
+  const responseToClient = await interaction.reply({ // TODO: what kind of response from client is this with >1 components?
     content: 'Choose your starter!',
     components: [row, row2]
   });
 
   try {
+    const responseFromClient: StringSelectMenuInteraction = await responseToClient.awaitMessageComponent<ComponentType.StringSelect>({
+      filter: (i: any) => i.user.id === interaction.user.id,
+      time: 10000
+    });
 
+    await responseFromClient.update({ content: `You chose ${responseFromClient.values[0]}!`, components: [] });
   } catch (error) {
     console.error(error);
     await interaction.editReply({ content: 'There was an error while executing this command!', components: [] });
