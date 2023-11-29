@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "module": "commonjs",
     "rootDir": "./src/",
     "outDir": "./dist/",
@@ -25,8 +27,9 @@
     "src/index.ts"
   ],
   "include": [
-    "./**/*.ts"
-, "interaction"  ],
+    "./**/*.ts",
+    "interaction",
+  ],
   "exclude": [
     "node_modules",
     "dist"
