@@ -1,4 +1,4 @@
-import { UserSelectMenuInteraction } from "discord.js";
+import { Message, UserSelectMenuInteraction } from "discord.js";
 import { checkAuth } from "../requests/checkAuth";
 import { getSharedGames } from "../requests/getSharedGames";
 import { ActionFunctionProps, HeartBeat } from "./ActionClass";
@@ -62,8 +62,10 @@ export async function sharedGamesAction({ confirmation }: ActionFunctionProps<Us
           // await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
           return { content: unauthReply + '\n' + 'No matching multiplayer games.', components: [], alive: true }
         } else if (unauthNames.length > 0) {
+          const textFileBuffer = Buffer.from(readableSharedGames) // TODO: figure out how to send text file
+          const test = new File([readableSharedGames], 'sharedGames.txt')
           // await confirmation.update({ content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [] })
-          return { content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [], alive: true }
+          return { content: unauthReply + '\n' + authReply + '\n' + readableSharedGames, components: [], alive: true }
         } else {
           // await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
           return { content: authReply + '\n' + readableSharedGames, components: [], alive: true }
