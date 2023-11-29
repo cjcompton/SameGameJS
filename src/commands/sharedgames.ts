@@ -27,26 +27,22 @@ export async function execute(interaction: CommandInteraction) {
   });
 
 
-  const sameGameActionClass = new ActionClass<
-    ComponentType.UserSelect,
-    UserSelectMenuInteraction,
-    UserSelectMenuBuilder
-  >(
+  const sharedGamesActionClass = new ActionClass<ComponentType.UserSelect, UserSelectMenuInteraction, UserSelectMenuBuilder>(
     sharedGamesAction,
     interaction,
     response,
     10000,
-    row1
+    [row1]
   )
 
   let lastContent: string | null | undefined = ''
   try {
-    let heartBeat = await sameGameActionClass.keepAlive()
+    let heartBeat = await sharedGamesActionClass.keepAlive()
     lastContent = heartBeat.content
     while (heartBeat.alive) {
       lastContent = heartBeat.content
       console.log('content', heartBeat.content)
-      heartBeat = await sameGameActionClass.keepAlive()
+      heartBeat = await sharedGamesActionClass.keepAlive()
     }
 
     await interaction.editReply({

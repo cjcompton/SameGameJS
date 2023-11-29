@@ -6,43 +6,45 @@ export interface HeartBeat {
   alive: boolean
 }
 
-type AllInteractionTypes = CollectedInteraction | AnySelectMenuInteraction
+// confirmation type
+type AllInteractionTypes<ComponentType extends MessageComponentType> = MappedInteractionTypes<boolean>[ComponentType]//CollectedInteraction | AnySelectMenuInteraction
 
 export interface ActionFunctionProps<ActionFunctionInteractionType> {
   // confirmation: CollectedInteraction | AnySelectMenuInteraction
   confirmation: ActionFunctionInteractionType
 }
 
+// row builder type
 type ActionFunctionType<ActionFunctionInteractionType> = {
   ({ confirmation }: ActionFunctionProps<ActionFunctionInteractionType>): Promise<HeartBeat>
 }
 
 export default class ActionClass<
-  ComponentType extends MessageComponentType,
-  ActionFunctionInteractionType extends AllInteractionTypes,
-  ActionFunctionBuilderType extends MessageActionRowComponentBuilder //| ModalActionRowComponentBuilder
+  ComponentType extends MessageComponentType, // confirmation component type
+  ActionFunctionInteractionType extends AllInteractionTypes<ComponentType>, // confirmation type
+  ActionFunctionBuilderType extends MessageActionRowComponentBuilder //| ModalActionRowComponentBuilder // row builder type
 > {
-  response: InteractionResponse
   actionFunction: ActionFunctionType<ActionFunctionInteractionType>
   interaction: CommandInteraction<CacheType>
+  response: InteractionResponse
   timeOut: number
-  row
+  rows: ActionRowBuilder<ActionFunctionBuilderType>[]
 
   constructor(
     actionFunction: ActionFunctionType<ActionFunctionInteractionType>,
     interaction: CommandInteraction<CacheType>,
     response: InteractionResponse,
     timeOut: number,
-    row: ActionRowBuilder<ActionFunctionBuilderType>
+    rows: ActionRowBuilder<ActionFunctionBuilderType>[]
   ) {
     this.actionFunction = actionFunction
     this.interaction = interaction
     this.response = response
     this.timeOut = timeOut
-    this.row = row
+    this.rows = rows
   }
 
-  collectorFilter = (i: any) => i.user.id === this.interaction.user.id;
+  collectorFilter = (i: any) => i.user.id === this.interaction.user.id; // TODO: make this toggleable
 
   async keepAlive() {
     try {
@@ -57,7 +59,7 @@ export default class ActionClass<
 
       if (heartBeat.alive) {
         const { content, components } = heartBeat
-        await confirmation.update({ content: 'Input active 🟢\n' + content, components: [this.row] })
+        await confirmation.update({ content: 'Input active 🟢\n' + content, components: this.rows })
         heartBeat = await this.actionFunction({ confirmation })
       }
       return heartBeat

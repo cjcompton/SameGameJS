@@ -26,3 +26,8 @@ edit samegame reply to keep user select open
 bot config:
   max bot instances per server
   default sharing: private/public
+
+
+---
+
+send lists > 5 lines as txt
