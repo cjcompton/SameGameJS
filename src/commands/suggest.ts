@@ -33,13 +33,21 @@ export async function execute(interaction: CommandInteraction) {
     .setMaxValues(5);
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder | UserSelectMenuBuilder>()
-    .addComponents(userSelect)
     .addComponents(select)
+  const row2 = new ActionRowBuilder<UserSelectMenuBuilder>()
+    .addComponents(userSelect)
 
-  await interaction.reply({
+  const response = await interaction.reply({
     content: 'Choose your starter!',
-    components: [row]
+    components: [row, row2]
   });
+
+  try {
+
+  } catch (error) {
+    console.error(error);
+    await interaction.editReply({ content: 'There was an error while executing this command!', components: [] });
+  }
 
 }
 
