@@ -1,10 +1,10 @@
 import { ActionRowBuilder, CacheType, CommandInteraction, ComponentType, InteractionResponse, MessageComponentType, MessageEditOptions, ModalActionRowComponentBuilder, SlashCommandBuilder, UserSelectMenuBuilder, UserSelectMenuInteraction } from "discord.js";
 import ActionClass from "../actions/ActionClass";
 // import { stuff } from "src/actions";
-import { sameGameAction } from "../actions/sameGameAction";
+import { sharedGamesAction } from "../actions/sharedGamesAction";
 
 export const data = new SlashCommandBuilder()
-  .setName("samegame")
+  .setName("sharedgames")
   .setDescription("Searches authorized mentioned users' Steam libraries for shared multiplayer games.")
 
 // get users
@@ -32,7 +32,7 @@ export async function execute(interaction: CommandInteraction) {
     UserSelectMenuInteraction,
     UserSelectMenuBuilder
   >(
-    sameGameAction,
+    sharedGamesAction,
     interaction,
     response,
     10000,

@@ -2,9 +2,9 @@ import * as ping from "./ping";
 import * as interact from "./test";
 import * as auth from './authenticate'
 import * as deauth from './deauthenticate'
-import * as samegame from './samegame'
+import * as sharedgames from './sharedgames'
 import * as help from './help'
-import * as suggest from './suggest'
+import * as suggestgames from './suggestgames'
 
 export const commands = {
   // ping,
@@ -12,6 +12,6 @@ export const commands = {
   help,
   auth,
   deauth,
-  samegame,
-  suggest,
+  sharedgames,
+  suggestgames,
 };

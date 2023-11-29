@@ -18,7 +18,7 @@ interface SharedGamesResponse {
   unauthenticatedDiscordIds: UnlinkedIds
 }
 
-export async function sameGameAction({ confirmation }: ActionFunctionProps<UserSelectMenuInteraction>): Promise<HeartBeat> {
+export async function sharedGamesAction({ confirmation }: ActionFunctionProps<UserSelectMenuInteraction>): Promise<HeartBeat> {
   try {
     const userIds = Array.from(confirmation.users.keys())
 

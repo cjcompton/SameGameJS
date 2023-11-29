@@ -1,7 +1,7 @@
 import { ActionRowBuilder, CommandInteraction, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuComponent, StringSelectMenuOptionBuilder, UserSelectMenuBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
-  .setName("suggest")
+  .setName("suggestgames")
   .setDescription("Suggests a game.");
 
 export async function execute(interaction: CommandInteraction) {
