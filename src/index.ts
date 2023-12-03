@@ -72,7 +72,7 @@ const replies = [
   { reply: "", punctuation: 'would hit the spot right now.' },
 ]
 
-client.on('messageCreate', async message => {
+client.on('messageCreate', async message => { // TODO: it might be too slow to check every single message
   const validResponse = await validMessage(message)
   if (!validResponse) return
   const response = await fetchText(validResponse)
