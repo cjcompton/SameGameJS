@@ -1,6 +1,7 @@
-import { ActionRowBuilder, CommandInteraction, ComponentType, MessageComponentType, ModalActionRowComponentBuilder, SlashCommandBuilder, UserSelectMenuBuilder, UserSelectMenuInteraction } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, CommandInteraction, ComponentType, MessageComponentType, ModalActionRowComponentBuilder, SlashCommandBuilder, UserSelectMenuBuilder, UserSelectMenuInteraction } from "discord.js";
 import { checkAuth } from "../requests/checkAuth";
 import { getSharedGames } from "../requests/getSharedGames";
+import { gamesResponse } from "../tests/gamesResponse";
 
 export const data = new SlashCommandBuilder()
   .setName("samegame")
@@ -28,6 +29,15 @@ export async function execute(interaction: CommandInteraction) {
   try {
     const confirmation: UserSelectMenuInteraction = await response.awaitMessageComponent<ComponentType.UserSelect>({ filter: collectorFilter, time: 60000 });
     const userIds = Array.from(confirmation.users.keys())
+
+    // const testObj = gamesResponse.join(',\n')
+    // const sharedGamesAttachment = new AttachmentBuilder(Buffer.from(testObj), { name: 'shared_games.txt' })
+    // await confirmation.update({
+    //   content: 'games @Users share',
+    //   components: [],
+    //   files: [sharedGamesAttachment]
+    // })
+    // return
 
     try {
       // if checkAuth fails you have big problems to worry about
@@ -58,7 +68,9 @@ export async function execute(interaction: CommandInteraction) {
       try {
         // compare games
         const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
-        const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
+        // const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
+        const readableSharedGames = sharedGames.games.map(obj => obj.name).join('\n')
+        const sharedGamesAttachment = new AttachmentBuilder(Buffer.from(readableSharedGames), { name: 'shared_games.txt' })
 
         if (sharedGames.privateSteamGamesDiscordIds.length > 0) {
           const unlinkedSteamDiscordNames = sharedGames.privateSteamGamesDiscordIds.map(userId => '<@' + userId + '>')
@@ -68,9 +80,17 @@ export async function execute(interaction: CommandInteraction) {
         if (sharedGames.games.length < 1) {
           await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
         } else if (unauthNames.length > 0) {
-          await confirmation.update({ content: unauthReply + '\n' + authReply + '\n' + readableSharedGames + '\n', components: [] })
+          await confirmation.update({
+            content: unauthReply + '\n' + authReply + '\n',
+            components: [],
+            files: [sharedGamesAttachment]
+          })
         } else {
-          await confirmation.update({ content: authReply + '\n' + readableSharedGames, components: [] })
+          await confirmation.update({
+            content: authReply + '\n',
+            components: [],
+            files: [sharedGamesAttachment]
+          })
         }
 
       } catch (e) { // getSharedGames catch
