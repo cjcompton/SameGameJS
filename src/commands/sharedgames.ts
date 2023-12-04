@@ -69,7 +69,7 @@ export async function execute(interaction: CommandInteraction) {
       try {
         // compare games
         const sharedGames: SharedGamesResponse = await getSharedGames(authResponse.authenticatedUserIds)
-        const readableSharedGames = '* ' + sharedGames.games.map(obj => obj).join('\n* ')
+        const readableSharedGames = '* ' + sharedGames.games.map(obj => obj.name).join('\n* ')
 
         if (sharedGames.privateSteamGamesDiscordIds.length > 0) {
           const unlinkedSteamDiscordNames = sharedGames.privateSteamGamesDiscordIds.map(userId => '<@' + userId + '>')
@@ -80,17 +80,22 @@ export async function execute(interaction: CommandInteraction) {
           await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
           return
         } else if (pingableUnauthNames.length > 0) {
-          const message = await confirmation.update({
-            content: authReply + unauthReply,
-            components: [],
-            fetchReply: true,
-          })
-          const thread = await message.startThread({
-            name: `Shared Steam Games for ${readableAuthNames.join(', ')}`,
-            autoArchiveDuration: 1440,
-            reason: 'Shared Steam games request',
-          });
-          await thread.send(readableSharedGames)
+          try {
+            const message = await confirmation.update({
+              content: authReply + unauthReply,
+              components: [],
+              fetchReply: true,
+            })
+            const thread = await message.startThread({
+              name: `Shared Steam Games for ${readableAuthNames.join(', ')}`,
+              autoArchiveDuration: 1440,
+              reason: 'Shared Steam games request',
+            });
+            await thread.send(readableSharedGames)
+          } catch (e) {
+            console.error(e)
+            await confirmation.update({ content: 'Internal server error: SG. Please report this error and try again later.', components: [] })
+          }
         }
 
 

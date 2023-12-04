@@ -32,20 +32,10 @@ client.on("guildCreate", async (guild) => {
   // TODO: send setup instructions
 });
 
-async function createThread(message: Message) {
-  if (!client.user) return
-  if (message.author.id === client.user.id) {
-    // create thread
-    const thread = await message.startThread({
-      name: 'Shared Steam Games',
-      autoArchiveDuration: 1440,
-      reason: 'Shared Steam games request',
-    })
-  }
-}
 async function isValidThreadMessage(message: Message) { // self create thread and send "random" message
   if (!client.user) return
   if (message.channel.isThread()) {
+    console.log("🚀 ~ file: index.ts:44 ~ isValidThreadMessage ~ message.channel.isThread()", message.channel.isThread())
     const messages = await message.channel.messages.fetch()
     const secondToLast = messages.last(2)[1]
     const secondToLastContent = secondToLast.content
