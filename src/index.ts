@@ -3,7 +3,7 @@ import { Partials, Client, Events, GatewayIntentBits, GuildMember, Message } fro
 import { registerCommands } from './register-commands';
 import { commands } from './commands';
 import { config } from './config';
-import { fetchText } from './requests/fetchText';
+// import { fetchText } from './requests/fetchText';
 
 const mode = JSON.parse(config.DEV_MODE) ? 'dev' : 'prod'
 // Create a new client instance
@@ -35,9 +35,10 @@ client.on("guildCreate", async (guild) => {
 async function isValidThreadMessage(message: Message) { // self create thread and send "random" message
   if (!client.user) return
   if (message.channel.isThread()) {
-    console.log("🚀 ~ file: index.ts:44 ~ isValidThreadMessage ~ message.channel.isThread()", message.channel.isThread())
+    const isThreadStarterMe = message.channel.ownerId === client.user?.id
+    if (!isThreadStarterMe) return
     const messages = await message.channel.messages.fetch()
-    const secondToLast = messages.last(2)[1]
+    const secondToLast = messages.last(2)[0]
     const secondToLastContent = secondToLast.content
     if (!secondToLast) return
     if (message.content.toLowerCase() !== 'random') return
@@ -69,7 +70,7 @@ const replies = [
   { reply: "Play", punctuation: '!' },
   { reply: "Oh yeah. It's", punctuation: 'time!' },
   { reply: "I'm thinking", punctuation: '.' },
-  { reply: "", punctuation: 'would hit the spot right now.' },
+  { reply: "", punctuation: ' would hit the spot right now.' },
 ]
 
 client.on('messageCreate', async message => { // TODO: it might be too slow to check every single message
@@ -78,7 +79,7 @@ client.on('messageCreate', async message => { // TODO: it might be too slow to c
   const gamesList = validResponse.split('\n')
   const randomGame = gamesList[Math.floor(Math.random() * gamesList.length)]
   const randomReply = replies[Math.floor(Math.random() * replies.length)]
-  message.reply({ content: `${randomReply.reply} ${randomGame} ${randomReply.punctuation}` })
+  message.reply({ content: `${randomReply.reply} ${randomGame.slice(2).trim()}${randomReply.punctuation}` })
 });
 
 client.on("interactionCreate", async (interaction) => {

@@ -79,23 +79,22 @@ export async function execute(interaction: CommandInteraction) {
         if (sharedGames.games.length < 1) {
           await confirmation.update({ content: unauthReply + '\n' + 'No matching multiplayer games.', components: [] })
           return
-        } else if (pingableUnauthNames.length > 0) {
-          try {
-            const message = await confirmation.update({
-              content: authReply + unauthReply,
-              components: [],
-              fetchReply: true,
-            })
-            const thread = await message.startThread({
-              name: `Shared Steam Games for ${readableAuthNames.join(', ')}`,
-              autoArchiveDuration: 1440,
-              reason: 'Shared Steam games request',
-            });
-            await thread.send(readableSharedGames)
-          } catch (e) {
-            console.error(e)
-            await confirmation.update({ content: 'Internal server error: SG. Please report this error and try again later.', components: [] })
-          }
+        }
+        try {
+          const message = await confirmation.update({
+            content: authReply + unauthReply,
+            components: [],
+            fetchReply: true,
+          })
+          const thread = await message.startThread({
+            name: `Shared Steam games for ${readableAuthNames.join(', ')}`,
+            autoArchiveDuration: 1440,
+            reason: 'Shared Steam games request',
+          });
+          await thread.send(readableSharedGames)
+        } catch (e) {
+          console.error(e)
+          await confirmation.update({ content: 'Internal server error: CON. Please report this error and try again later.', components: [] })
         }
 
 
