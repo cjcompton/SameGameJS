@@ -32,32 +32,42 @@ client.on("guildCreate", async (guild) => {
   // TODO: send setup instructions
 });
 
-async function validMessage(message: Message) {
-  if (message.channel.isThread()) {
-    const starterMsg = await message.channel.fetchStarterMessage()
-    if (!starterMsg) return
-    if (!client.user) return
-    if (message.content.toLowerCase() !== 'random') return
-    const attachment = starterMsg.attachments.first()?.url
-    if (!attachment) return
-    const isSenderMsgMe = starterMsg.author.id === client.user?.id
-    if (!isSenderMsgMe) return
-    return attachment
-  }
+async function createThread(message: Message) {
   if (!client.user) return
-  if (!message.mentions.has(client.user)) return
-  if (message.content.toLowerCase() !== 'random') return
-  if (!message.reference) return
-  const repliedMsgId = message.reference.messageId
-  if (!repliedMsgId) return
-  const repliedMsg = await message.channel.messages.fetch(repliedMsgId)
-  const attachment = repliedMsg.attachments.first()?.url
-  console.log("🚀 ~ file: index.ts:44 ~ validMessage ~ attachment:", attachment)
-  if (!attachment) return
-  const isSenderMsgMe = repliedMsg.author.id === client.user?.id
-  if (!isSenderMsgMe) return
-
-  return attachment
+  if (message.author.id === client.user.id) {
+    // create thread
+    const thread = await message.startThread({
+      name: 'Shared Steam Games',
+      autoArchiveDuration: 1440,
+      reason: 'Shared Steam games request',
+    })
+  }
+}
+async function isValidThreadMessage(message: Message) { // self create thread and send "random" message
+  if (!client.user) return
+  if (message.channel.isThread()) {
+    const messages = await message.channel.messages.fetch()
+    const secondToLast = messages.last(2)[1]
+    const secondToLastContent = secondToLast.content
+    if (!secondToLast) return
+    if (message.content.toLowerCase() !== 'random') return
+    const isSenderMsgMe = secondToLast.author.id === client.user?.id
+    if (!isSenderMsgMe) return
+    return secondToLastContent
+  }
+  // if (!client.user) return
+  // if (!message.mentions.has(client.user)) return
+  // if (message.content.toLowerCase() !== 'random') return
+  // if (!message.reference) return
+  // const repliedMsgId = message.reference.messageId
+  // if (!repliedMsgId) return
+  // const repliedMsg = await message.channel.messages.fetch(repliedMsgId)
+  // const attachment = repliedMsg.attachments.first()?.url
+  // console.log("🚀 ~ file: index.ts:44 ~ validMessage ~ attachment:", attachment)
+  // if (!attachment) return
+  // const isSenderMsgMe = repliedMsg.author.id === client.user?.id
+  // if (!isSenderMsgMe) return
+  // return attachment
 }
 
 const replies = [
@@ -73,11 +83,9 @@ const replies = [
 ]
 
 client.on('messageCreate', async message => { // TODO: it might be too slow to check every single message
-  const validResponse = await validMessage(message)
+  const validResponse = await isValidThreadMessage(message)
   if (!validResponse) return
-  const response = await fetchText(validResponse)
-  if (!response) return
-  const gamesList = response.split('\n')
+  const gamesList = validResponse.split('\n')
   const randomGame = gamesList[Math.floor(Math.random() * gamesList.length)]
   const randomReply = replies[Math.floor(Math.random() * replies.length)]
   message.reply({ content: `${randomReply.reply} ${randomGame} ${randomReply.punctuation}` })
